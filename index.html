@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Chat App</title>
+</head>
+<body>
+    
+    
+
+
+
+
+    <!-- FIREBASE -->
+ <!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/7.15.1/firebase-app.js"></script>
+
+<!-- include Firebase database-->
+<script src="https://www.gstatic.com/firebasejs/7.15.1/firebase-database.js"></script>
+
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+<script src="https://www.gstatic.com/firebasejs/7.15.1/firebase-analytics.js"></script>
+
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyBmwtuUe6wX4xB1OFGuKDcKQBUfLiJbOqg",
+    authDomain: "simple-chat-project-1c730.firebaseapp.com",
+    databaseURL: "https://simple-chat-project-1c730.firebaseio.com",
+    projectId: "simple-chat-project-1c730",
+    storageBucket: "simple-chat-project-1c730.appspot.com",
+    messagingSenderId: "277970453963",
+    appId: "1:277970453963:web:82772394706079bdc8e24e",
+    measurementId: "G-X4VV4HH0Z3"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  firebase.analytics();
+
+  var myName = prompt("Enter your name");
+
+</script>
+
+    
+    <!-- create a form to send message -->
+
+    <ul id="messages"></ul>
+
+    <form onsubmit="return sendMessage();">
+            <input type="text" id="message" placeholder="Enter message" autocomplete="off">
+    
+            <input type="submit">
+        </form>
+         
+    <script>
+        function sendMessage() {
+            // get message
+            var message = document.getElementById("message").value;
+     
+            // save in database
+            firebase.database().ref("messages").push().set({
+                "sender": myName,
+                "message": message
+            });
+     
+            // prevent form from submitting
+            return false;
+        }
+
+        //listen for incoming messages
+        firebase.database().ref("messages").on("child_added",function(snapshot){
+            var html="";
+            //give each message a unique id
+            html+="<li id='message-" + snapshot.key + "'>";
+            if(snapshot.val().sender == myName){
+                html += "<button data-id='" + snapshot.key + "' onclick='deleteMessage(this);'>";
+                    html+= "Delete";
+                html += "</button>";
+            }
+            html+= snapshot.val().sender + ": " + snapshot.val().message;
+            html+="</li>";
+
+            document.getElementById("messages").innerHTML += html;
+        })
+
+    //     function deleteMessage(self){
+    //         //get Message ID
+    //         var messageId = self.getAttribute("data-id");
+
+    //         //delete message
+    //         firebase.database().ref("messages").child(messageId).remove();
+
+    //         //attach listener for delete message
+    //         firebase.database().ref("messages").on("child_removed", function (snapshot) {
+    //         // remove message node
+    //         document.getElementById("message-" + snapshot.key).innerHTML = "This message has been removed";
+    //         });
+
+    //     }
+            function deleteMessage(self) {
+            // get message ID
+            var messageId = self.getAttribute("data-id");
+        
+            // delete message
+            firebase.database().ref("messages").child(messageId).remove();
+             }
+        
+             // attach listener for delete message
+            firebase.database().ref("messages").on("child_removed", function (snapshot) {
+            // remove message node
+            document.getElementById("message-" + snapshot.key).innerHTML = "This message has been removed";
+        });
+    // </script>
+    
+</body>
+</html>
